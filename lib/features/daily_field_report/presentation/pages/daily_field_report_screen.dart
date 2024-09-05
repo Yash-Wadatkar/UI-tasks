@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:calendar_date_picker2/calendar_date_picker2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -153,218 +151,230 @@ class _DailyFieldReportScreenState extends State<DailyFieldReportScreen> {
             print('-------------------> form rebuild');
             return Form(
               key: _formKey,
-              child: Container(
-                height: 45.h,
-                width: double.infinity,
-                color: Colors.white,
+              child: SingleChildScrollView(
                 child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 5.w),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SizedBox(height: 1.h),
-                      Text(
-                        addDFRText,
-                        style: TextStyle(
-                            fontSize: 20.sp,
-                            fontWeight: FontWeight.w700,
-                            color: blueColor),
-                      ),
-                      SizedBox(height: 1.5.h),
-
-                      /// Widget for custom textfield
-                      CustomTextFieldWidget(
-                        controller: nameController,
-                        textfieldName: 'DFR Name',
-                        validator: (value) {
-                          print('-------------------> validation rebuild');
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter a DFR Name';
-                          }
-                          return null;
-                        },
-                      ),
-                      SizedBox(height: 2.5.h),
-                      ischecked
-                          ? Row(
-                              children: [
-                                Expanded(
-                                  flex: 8,
-                                  child: CustomTextFieldWidget(
-                                    controller: fromDateController,
-                                    textfieldName: 'From',
-                                    suffixIcon: Icon(
-                                      Icons.calendar_month_outlined,
-                                      color: blueColor,
-                                    ),
-                                    onpress: () {
-                                      dailyFieldReportScreenBloc.add(
-                                          OpenDatePickerEvent(
-                                              textfieldName: 'fromDate'));
-                                    },
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Please select a From date';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                ),
-                                const Expanded(flex: 1, child: SizedBox()),
-                                Expanded(
-                                  flex: 8,
-                                  child: CustomTextFieldWidget(
-                                    controller: toDateController,
-                                    textfieldName: 'To',
-                                    suffixIcon: Icon(
-                                      Icons.calendar_month_outlined,
-                                      color: blueColor,
-                                    ),
-                                    onpress: () {
-                                      dailyFieldReportScreenBloc.add(
-                                          OpenDatePickerEvent(
-                                              textfieldName: 'toDate'));
-                                    },
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Please select a To date';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                ),
-                              ],
-                            )
-                          : CustomTextFieldWidget(
-                              controller: ischecked
-                                  ? TextEditingController()
-                                  : dateController,
-                              textfieldName: 'Date',
-                              suffixIcon: Icon(
-                                Icons.calendar_month_outlined,
-                                color: blueColor,
-                              ),
-                              onpress: () {
-                                dailyFieldReportScreenBloc.add(
-                                    OpenDatePickerEvent(textfieldName: 'date'));
-                              },
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Please select a date';
-                                }
-                                return null;
-                              },
-                            ),
-
-                      SizedBox(height: 1.5.h),
-                      Row(
+                  /// prevent the overlap of textfield with keyboard
+                  ///  viewInsets.bottom gives  how much space the system UI (like the keyboard) is taking up from the bottom of the screen.
+                  padding: EdgeInsets.only(
+                      bottom: MediaQuery.of(context).viewInsets.bottom),
+                  child: Container(
+                    height: 45.h,
+                    width: double.infinity,
+                    color: Colors.white,
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 5.w),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Checkbox(
-                            activeColor: blueColor,
-                            shape: const ContinuousRectangleBorder(
-                                borderRadius: BorderRadius.all(Radius.zero)),
-                            value: ischecked,
-                            onChanged: (value) {
-                              dailyFieldReportScreenBloc
-                                  .add(ToggleCheckboxEvent(isChecked: value!));
-                              if (value) {
-                                /// Clear date when multi-day is selected
-                                dateController.clear();
+                          SizedBox(height: 1.h),
+                          Text(
+                            addDFRText,
+                            style: TextStyle(
+                                fontSize: 20.sp,
+                                fontWeight: FontWeight.w700,
+                                color: blueColor),
+                          ),
+                          SizedBox(height: 1.5.h),
 
-                                /// select day value chnage to null
-                                _selectedDate = null;
-                              } else {
-                                /// Clear from/to dates when single day is selected
-                                fromDateController.clear();
-                                toDateController.clear();
-
-                                /// select day value chnage to null
-                                _selectedFromDate = null;
-                                _selectedToDate = null;
+                          /// Widget for custom textfield
+                          CustomTextFieldWidget(
+                            controller: nameController,
+                            textfieldName: 'DFR Name',
+                            validator: (value) {
+                              print('-------------------> validation rebuild');
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter a DFR Name';
                               }
+                              return null;
                             },
                           ),
-                          const Text(
-                              'This log represents progress over multiple days'),
-                        ],
-                      ),
-
-                      SizedBox(height: 2.5.h),
-                      Row(
-                        children: [
-                          /// cancel button
-                          Expanded(
-                            flex: 6,
-                            child: OutlinedButton(
-                                style: OutlinedButton.styleFrom(
-                                  shape: const ContinuousRectangleBorder(
-                                      borderRadius:
-                                          BorderRadius.all(Radius.zero)),
-                                  side:
-                                      BorderSide(width: 2.0, color: blueColor),
-                                ),
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                },
-                                child: Padding(
-                                  padding:
-                                      EdgeInsets.symmetric(vertical: 1.5.h),
-                                  child: Text(
-                                    cancelText,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: CustomTextStyle.textStyle(
-                                        fontSize: 16.sp,
-                                        color: blueColor,
-                                        fontWeight: FontWeight.w500),
-                                  ),
-                                )),
-                          ),
-
-                          const Expanded(flex: 1, child: SizedBox()),
-
-                          /// Add DFR Button
-                          Expanded(
-                            flex: 6,
-                            child: ElevatedButton(
-                                style: ButtonStyle(
-                                    backgroundColor:
-                                        WidgetStatePropertyAll(blueColor),
-                                    shape: const WidgetStatePropertyAll(
-                                        ContinuousRectangleBorder(
-                                            borderRadius: BorderRadius.all(
-                                                Radius.zero)))),
-                                onPressed: () {
-                                  if (_formKey.currentState!.validate()) {
-                                    // Add validation check
-                                    dailyFieldReportScreenBloc.add(
-                                      AddDFRButtonClickedEvent(
-                                        dfrData: DfrData(
-                                          dfrName: nameController.text,
-                                          date: dateController.text,
-                                          fromDate: fromDateController.text,
-                                          toDate: toDateController.text,
+                          SizedBox(height: 2.5.h),
+                          ischecked
+                              ? Row(
+                                  children: [
+                                    Expanded(
+                                      flex: 8,
+                                      child: CustomTextFieldWidget(
+                                        controller: fromDateController,
+                                        textfieldName: 'From',
+                                        suffixIcon: Icon(
+                                          Icons.calendar_month_outlined,
+                                          color: blueColor,
                                         ),
+                                        onpress: () {
+                                          dailyFieldReportScreenBloc.add(
+                                              OpenDatePickerEvent(
+                                                  textfieldName: 'fromDate'));
+                                        },
+                                        validator: (value) {
+                                          if (value == null || value.isEmpty) {
+                                            return 'Please select a From date';
+                                          }
+                                          return null;
+                                        },
                                       ),
-                                    );
-                                    Navigator.pop(context);
+                                    ),
+                                    const Expanded(flex: 1, child: SizedBox()),
+                                    Expanded(
+                                      flex: 8,
+                                      child: CustomTextFieldWidget(
+                                        controller: toDateController,
+                                        textfieldName: 'To',
+                                        suffixIcon: Icon(
+                                          Icons.calendar_month_outlined,
+                                          color: blueColor,
+                                        ),
+                                        onpress: () {
+                                          dailyFieldReportScreenBloc.add(
+                                              OpenDatePickerEvent(
+                                                  textfieldName: 'toDate'));
+                                        },
+                                        validator: (value) {
+                                          if (value == null || value.isEmpty) {
+                                            return 'Please select a To date';
+                                          }
+                                          return null;
+                                        },
+                                      ),
+                                    ),
+                                  ],
+                                )
+                              : CustomTextFieldWidget(
+                                  controller: ischecked
+                                      ? TextEditingController()
+                                      : dateController,
+                                  textfieldName: 'Date',
+                                  suffixIcon: Icon(
+                                    Icons.calendar_month_outlined,
+                                    color: blueColor,
+                                  ),
+                                  onpress: () {
+                                    dailyFieldReportScreenBloc.add(
+                                        OpenDatePickerEvent(
+                                            textfieldName: 'date'));
+                                  },
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'Please select a date';
+                                    }
+                                    return null;
+                                  },
+                                ),
+
+                          SizedBox(height: 1.5.h),
+                          Row(
+                            children: [
+                              Checkbox(
+                                activeColor: blueColor,
+                                shape: const ContinuousRectangleBorder(
+                                    borderRadius:
+                                        BorderRadius.all(Radius.zero)),
+                                value: ischecked,
+                                onChanged: (value) {
+                                  /// reset the current state of the
+                                  _formKey.currentState!.reset();
+                                  dailyFieldReportScreenBloc.add(
+                                      ToggleCheckboxEvent(isChecked: value!));
+                                  if (value) {
+                                    /// Clear date when multi-day is selected
+                                    dateController.clear();
+
+                                    /// select day value chnage to null
+                                    _selectedDate = null;
+                                  } else {
+                                    /// Clear from/to dates when single day is selected
+                                    fromDateController.clear();
+                                    toDateController.clear();
+
+                                    /// select day value chnage to null
+                                    _selectedFromDate = null;
+                                    _selectedToDate = null;
                                   }
                                 },
-                                child: Padding(
-                                  padding:
-                                      EdgeInsets.symmetric(vertical: 1.5.h),
-                                  child: Text(
-                                    addDFRText,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: CustomTextStyle.textStyle(
-                                        fontSize: 16.sp,
-                                        fontWeight: FontWeight.w500,
-                                        color: Colors.white),
-                                  ),
-                                )),
+                              ),
+                              const Text(
+                                  'This log represents progress over multiple days'),
+                            ],
+                          ),
+
+                          SizedBox(height: 2.5.h),
+                          Row(
+                            children: [
+                              /// cancel button
+                              Expanded(
+                                flex: 6,
+                                child: OutlinedButton(
+                                    style: OutlinedButton.styleFrom(
+                                      shape: const ContinuousRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.all(Radius.zero)),
+                                      side: BorderSide(
+                                          width: 2.0, color: blueColor),
+                                    ),
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                    },
+                                    child: Padding(
+                                      padding:
+                                          EdgeInsets.symmetric(vertical: 1.5.h),
+                                      child: Text(
+                                        cancelText,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: CustomTextStyle.textStyle(
+                                            fontSize: 16.sp,
+                                            color: blueColor,
+                                            fontWeight: FontWeight.w500),
+                                      ),
+                                    )),
+                              ),
+
+                              const Expanded(flex: 1, child: SizedBox()),
+
+                              /// Add DFR Button
+                              Expanded(
+                                flex: 6,
+                                child: ElevatedButton(
+                                    style: ButtonStyle(
+                                        backgroundColor:
+                                            WidgetStatePropertyAll(blueColor),
+                                        shape: const WidgetStatePropertyAll(
+                                            ContinuousRectangleBorder(
+                                                borderRadius: BorderRadius.all(
+                                                    Radius.zero)))),
+                                    onPressed: () {
+                                      if (_formKey.currentState!.validate()) {
+                                        // Add validation check
+                                        dailyFieldReportScreenBloc.add(
+                                          AddDFRButtonClickedEvent(
+                                            dfrData: DfrData(
+                                              dfrName: nameController.text,
+                                              date: dateController.text,
+                                              fromDate: fromDateController.text,
+                                              toDate: toDateController.text,
+                                            ),
+                                          ),
+                                        );
+                                        Navigator.pop(context);
+                                      }
+                                    },
+                                    child: Padding(
+                                      padding:
+                                          EdgeInsets.symmetric(vertical: 1.5.h),
+                                      child: Text(
+                                        addDFRText,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: CustomTextStyle.textStyle(
+                                            fontSize: 16.sp,
+                                            fontWeight: FontWeight.w500,
+                                            color: Colors.white),
+                                      ),
+                                    )),
+                              )
+                            ],
                           )
                         ],
-                      )
-                    ],
+                      ),
+                    ),
                   ),
                 ),
               ),

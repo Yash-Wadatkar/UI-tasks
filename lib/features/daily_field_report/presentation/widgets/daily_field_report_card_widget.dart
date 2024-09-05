@@ -17,7 +17,6 @@ class DailyFieldReportCardWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 12.h,
       child: Card(
         shape: const ContinuousRectangleBorder(),
         color: Colors.white,
