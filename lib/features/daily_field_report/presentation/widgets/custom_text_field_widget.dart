@@ -28,6 +28,7 @@ class CustomTextFieldWidget extends StatelessWidget {
         ),
         SizedBox(height: 1.h),
         TextFormField(
+          autovalidateMode: AutovalidateMode.onUserInteraction,
           validator: validator,
           controller: controller,
           readOnly: suffixIcon == null ? false : true,

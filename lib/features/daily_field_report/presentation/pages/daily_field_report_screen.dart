@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:calendar_date_picker2/calendar_date_picker2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -32,7 +34,10 @@ class _DailyFieldReportScreenState extends State<DailyFieldReportScreen> {
   final TextEditingController fromDateController = TextEditingController();
   final TextEditingController toDateController = TextEditingController();
 
-  DateTime? _selectedDate = DateTime.now();
+  DateTime? _selectedDate = null;
+  DateTime? _selectedFromDate = null;
+  DateTime? _selectedToDate = null;
+
   final bool _ischecked = false;
 
   @override
@@ -56,6 +61,7 @@ class _DailyFieldReportScreenState extends State<DailyFieldReportScreen> {
               if (initState.dfrDataList!.isEmpty) {
                 print('inside if');
                 return Scaffold(
+                  backgroundColor: skyBlueColor,
                   appBar: _buildAppBarWidget(),
                   body: NoDfrAddedTextWidget(
                     onpress: () {
@@ -67,6 +73,7 @@ class _DailyFieldReportScreenState extends State<DailyFieldReportScreen> {
               } else {
                 print('inside elsse');
                 return Scaffold(
+                  backgroundColor: skyBlueColor,
                   appBar: _buildAppBarWidget(),
                   body: ListView.builder(
                     padding: EdgeInsets.all(2.w),
@@ -82,6 +89,9 @@ class _DailyFieldReportScreenState extends State<DailyFieldReportScreen> {
                     },
                   ),
                   floatingActionButton: FloatingActionButton(
+                    backgroundColor: blueColor,
+                    foregroundColor: Colors.white,
+                    child: const Icon(Icons.add),
                     onPressed: () {
                       nameController.clear();
                       dailyFieldReportScreenBloc.add(
@@ -140,16 +150,8 @@ class _DailyFieldReportScreenState extends State<DailyFieldReportScreen> {
             if (state is CheckboxToggledState) {
               ischecked = state.isChecked;
             }
-
-            if (!ischecked) {
-              dateController.clear();
-            } else {
-              fromDateController.clear();
-              toDateController.clear();
-            }
-
+            print('-------------------> form rebuild');
             return Form(
-              autovalidateMode: AutovalidateMode.onUserInteraction,
               key: _formKey,
               child: Container(
                 height: 45.h,
@@ -175,6 +177,7 @@ class _DailyFieldReportScreenState extends State<DailyFieldReportScreen> {
                         controller: nameController,
                         textfieldName: 'DFR Name',
                         validator: (value) {
+                          print('-------------------> validation rebuild');
                           if (value == null || value.isEmpty) {
                             return 'Please enter a DFR Name';
                           }
@@ -224,7 +227,7 @@ class _DailyFieldReportScreenState extends State<DailyFieldReportScreen> {
                                     },
                                     validator: (value) {
                                       if (value == null || value.isEmpty) {
-                                        return 'Please select a From date';
+                                        return 'Please select a To date';
                                       }
                                       return null;
                                     },
@@ -247,7 +250,7 @@ class _DailyFieldReportScreenState extends State<DailyFieldReportScreen> {
                               },
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
-                                  return 'Please select a From date';
+                                  return 'Please select a date';
                                 }
                                 return null;
                               },
@@ -264,6 +267,21 @@ class _DailyFieldReportScreenState extends State<DailyFieldReportScreen> {
                             onChanged: (value) {
                               dailyFieldReportScreenBloc
                                   .add(ToggleCheckboxEvent(isChecked: value!));
+                              if (value) {
+                                /// Clear date when multi-day is selected
+                                dateController.clear();
+
+                                /// select day value chnage to null
+                                _selectedDate = null;
+                              } else {
+                                /// Clear from/to dates when single day is selected
+                                fromDateController.clear();
+                                toDateController.clear();
+
+                                /// select day value chnage to null
+                                _selectedFromDate = null;
+                                _selectedToDate = null;
+                              }
                             },
                           ),
                           const Text(
@@ -354,12 +372,19 @@ class _DailyFieldReportScreenState extends State<DailyFieldReportScreen> {
           },
         );
       },
+    ).whenComplete(
+      () {
+        /// clear controllers data and reset the dates when action is complete
+        _clearControllersData();
+        _resetDates();
+      },
     );
   }
 
   /// method to built appbar
   PreferredSizeWidget _buildAppBarWidget() {
     return AppBar(
+      backgroundColor: Colors.white,
       title: Row(
         children: [
           Padding(
@@ -383,12 +408,12 @@ class _DailyFieldReportScreenState extends State<DailyFieldReportScreen> {
     );
   }
 
-  /// method to show calender date picker and pick dates
-  void _showDatePicker(String field) async {
-    _selectedDate = DateTime.now();
+  /// Method to show calendar date picker and pick dates for both single and multi-date selection
+  void _showDatePicker(String field) {
     showModalBottomSheet(
       shape: const ContinuousRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.zero)),
+        borderRadius: BorderRadius.all(Radius.zero),
+      ),
       backgroundColor: Colors.white,
       showDragHandle: true,
       isDismissible: true,
@@ -406,14 +431,59 @@ class _DailyFieldReportScreenState extends State<DailyFieldReportScreen> {
             child: CalendarDatePicker2(
               config: CalendarDatePicker2Config(
                 calendarType: CalendarDatePicker2Type.single,
+                selectableDayPredicate: (date) {
+                  if (field == 'fromDate') {
+                    // Disable all dates after the current selected "To" date
+                    if (_selectedToDate != null &&
+                        date.isAfter(_selectedToDate!)) {
+                      return false;
+                    }
+                  }
+
+                  if (field == 'toDate') {
+                    // Disable all dates before the selected "From" date
+                    if (_selectedFromDate != null &&
+                        date.isBefore(_selectedFromDate!)) {
+                      return false;
+                    }
+                  }
+
+                  return true;
+                },
               ),
-              value: _selectedDate != null ? [_selectedDate!] : [],
+              value: _getInitialDatesForField(field),
               onValueChanged: (dates) async {
                 if (dates.isNotEmpty) {
-                  _selectedDate = dates.first;
-                  dailyFieldReportScreenBloc.add(
-                    SelectDateEvent(_selectedDate!, field),
-                  );
+                  if (field == 'date') {
+                    _selectedDate = dates.first;
+                    dailyFieldReportScreenBloc.add(
+                      SelectDateEvent(_selectedDate!, field),
+                    );
+                  } else if (field == 'fromDate') {
+                    _selectedFromDate = dates.first;
+                    dailyFieldReportScreenBloc.add(
+                      SelectDateEvent(_selectedFromDate!, field),
+                    );
+
+                    // Clear and reset "To" date if it's before the new "From" date
+                    if (_selectedToDate != null &&
+                        _selectedFromDate!.isAfter(_selectedToDate!)) {
+                      _selectedToDate = null;
+                      toDateController.clear();
+                    }
+                  } else if (field == 'toDate') {
+                    _selectedToDate = dates.first;
+                    dailyFieldReportScreenBloc.add(
+                      SelectDateEvent(_selectedToDate!, field),
+                    );
+
+                    // Clear and reset "From" date if it's after the new "To" date
+                    if (_selectedFromDate != null &&
+                        _selectedToDate!.isBefore(_selectedFromDate!)) {
+                      _selectedFromDate = null;
+                      fromDateController.clear();
+                    }
+                  }
 
                   await Future.delayed(const Duration(milliseconds: 400));
                   // ignore: use_build_context_synchronously
@@ -425,5 +495,36 @@ class _DailyFieldReportScreenState extends State<DailyFieldReportScreen> {
         );
       },
     );
+  }
+
+  /// Method to get the initial dates for each field
+  List<DateTime?> _getInitialDatesForField(String field) {
+    switch (field) {
+      case 'date':
+        return _selectedDate != null ? [_selectedDate!] : [];
+      case 'fromDate':
+        return _selectedFromDate != null ? [_selectedFromDate!] : [];
+      case 'toDate':
+        return _selectedToDate != null ? [_selectedToDate!] : [];
+      default:
+        return [];
+    }
+  }
+
+  /// method to clear all controllers data
+  void _clearControllersData() {
+    /// clearing the controllers data on press of cancel button
+    dateController.clear();
+    nameController.clear();
+    toDateController.clear();
+    fromDateController.clear();
+  }
+
+  /// method to reset the dates
+  void _resetDates() {
+    /// reset the dates
+    _selectedDate = null;
+    _selectedFromDate = null;
+    _selectedToDate = null;
   }
 }

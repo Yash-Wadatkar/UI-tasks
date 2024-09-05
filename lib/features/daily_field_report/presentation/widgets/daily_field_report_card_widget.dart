@@ -32,6 +32,7 @@ class DailyFieldReportCardWidget extends StatelessWidget {
                     flex: 10,
                     child: Text(
                       dfrName,
+                      overflow: TextOverflow.ellipsis,
                       style: CustomTextStyle.textStyle(
                           fontSize: 16.sp, fontWeight: FontWeight.w600),
                     ),
@@ -65,7 +66,7 @@ class DailyFieldReportCardWidget extends StatelessWidget {
               ),
               Text(
                   date == null || date!.isEmpty
-                      ? '$toDate to $fromDate'
+                      ? '$fromDate to $toDate'
                       : date!,
                   overflow: TextOverflow.ellipsis,
                   style: CustomTextStyle.textStyle(
