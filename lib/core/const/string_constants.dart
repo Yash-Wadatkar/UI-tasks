@@ -15,6 +15,17 @@ const String suggestLineItemHeading =
     'Suggested Line Items for Daily Field Report';
 const String addToDfr = 'Add to DFR';
 const String itemSelected = 'Items Selected';
+const String dailyFieldReport = 'Daily Field Report';
+const String noDfrtext = 'No DFR added yet!';
+const String startAddingDfrText =
+    'Start adding DFR as the work on site progresses.';
+const addNewDfrText = 'Add New DFR';
+
+const String dailyFieldReportText = 'Daily Field Report';
+
+const String addDFRText = 'Add DFR';
+
+const String cancelText = 'Cancel';
 
 /// static data for items table
 const List<Map<String, String>> itemsList = [

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:ui_tasks/features/add_item/presentation/pages/add_item_screen.dart';
 import 'package:sizer/sizer.dart';
+import 'package:ui_tasks/features/daily_field_report/presentation/pages/daily_field_report_screen.dart';
 import 'package:ui_tasks/features/select_item_screen/presentation/pages/select_item_screen.dart';
 
 void main() {
@@ -19,7 +20,7 @@ class MyApp extends StatelessWidget {
           debugShowCheckedModeBanner: false,
 
           /// add item screen
-          home: SelectItemScreen(),
+          home: DailyFieldReportScreen(),
         );
       },
     );

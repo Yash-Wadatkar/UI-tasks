@@ -12,3 +12,4 @@ Color greyColor = Colors.grey;
 Color mediumgreyColor = const Color(0xffa6acb1);
 Color cardHeadingBackgroundColor = const Color(0xffe5f4fb);
 Color greenColor = const Color(0xff2cbc6e);
+Color blackColor = Colors.black;

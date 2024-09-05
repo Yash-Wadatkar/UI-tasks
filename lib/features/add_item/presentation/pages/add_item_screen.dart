@@ -21,6 +21,7 @@ class AddItemScreen extends StatefulWidget {
 
 class _AddItemScreenState extends State<AddItemScreen> {
   /// creating instance of AddItemBloc
+
   final addItemScreenBloc = AddItemsBloc();
   @override
   Widget build(BuildContext context) {
@@ -40,6 +41,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
             ),
             Text(
               addItem,
+              overflow: TextOverflow.ellipsis,
               style: CustomTextStyle.textStyle(
                   color: appBarTextColor,
                   fontSize: 18.sp,
