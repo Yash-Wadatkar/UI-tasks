@@ -23,7 +23,7 @@ class _AddWorkScreenState extends State<AddWorkScreen> {
   final addWorkScreenBloc = AddWorkScreenBloc();
 
   /// creating variable for date
-  DateTime? _selectedDate = null;
+  DateTime? _selectedDate;
 
   /// creating textcontroller for date field
   List<TextEditingController> _dateControllers = [];
@@ -197,6 +197,18 @@ class _AddWorkScreenState extends State<AddWorkScreen> {
 
   /// Method to show calendar date picker
   void _showDatePicker(int index) {
+    /// Get the existing date from the text field, if any
+    String existingDateText = _dateControllers[index].text;
+    DateTime? initialDate;
+
+    if (existingDateText.isNotEmpty) {
+      /// Parse the existing date from the text field, if it's not empty
+      initialDate = DateFormat('LLL-dd-yyyy').parse(existingDateText);
+    } else {
+      /// Set the initial date to the current date if no date is selected
+      initialDate = DateTime.now();
+    }
+
     showDialog(
       context: context,
       builder: (context) {
@@ -211,7 +223,9 @@ class _AddWorkScreenState extends State<AddWorkScreen> {
                 config: CalendarDatePicker2Config(
                   calendarType: CalendarDatePicker2Type.single,
                 ),
-                value: _selectedDate != null ? [_selectedDate!] : [],
+
+                /// Use the initial date (parsed from text or current date)
+                value: initialDate != null ? [initialDate] : [],
                 onValueChanged: (dates) {
                   if (dates.isNotEmpty) {
                     // Assign the selected date
