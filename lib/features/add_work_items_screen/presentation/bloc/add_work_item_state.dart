@@ -13,7 +13,23 @@ class AddWorkItemScreenInitialState extends AddWorkItemState {}
 final class OpenCalenderSate extends AddWorkItemListnerState {}
 
 /// state for checkbox click
-class CheckBoxClickState extends AddWorkItemState {}
+final class CheckBoxClickState extends AddWorkItemListnerState {
+  final bool isChecked;
+  final String fieldName;
+
+  CheckBoxClickState({required this.fieldName, required this.isChecked});
+}
 
 /// state for opening drop down
 class OpenDropDownState extends AddWorkItemState {}
+
+/// state for selecting value from drop down
+final class SelectValueState extends AddWorkItemListnerState {
+  final String value;
+  final String fieldName;
+
+  SelectValueState({required this.fieldName, required this.value});
+}
+
+/// save and add button clicked state
+final class SaveAndAddButtonClickedState extends AddWorkItemListnerState {}

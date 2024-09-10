@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
           debugShowCheckedModeBanner: false,
 
           /// add item screen
-          home: AddWorkItemsScreen(),
+          home: AddWorkScreen(),
         );
       },
     );

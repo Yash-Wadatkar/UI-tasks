@@ -8,12 +8,15 @@ class WorkItemScreenTextfield extends StatelessWidget {
   final TextEditingController controller;
   final Widget? suffixIcon;
   final void Function()? ontap;
+  final String? Function(String?)? validator;
+
   const WorkItemScreenTextfield(
       {super.key,
       required this.textfieldName,
       required this.controller,
       this.suffixIcon,
-      this.ontap});
+      this.ontap,
+      this.validator});
 
   @override
   Widget build(BuildContext context) {
@@ -25,6 +28,7 @@ class WorkItemScreenTextfield extends StatelessWidget {
       ),
       SizedBox(height: 1.h),
       TextFormField(
+          validator: validator,
           onTap: ontap,
           autovalidateMode: AutovalidateMode.onUserInteraction,
           controller: controller,

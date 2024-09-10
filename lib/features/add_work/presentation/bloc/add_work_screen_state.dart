@@ -13,3 +13,6 @@ final class OpenCalenderState extends AddWorkScreenListnerState {
 
   OpenCalenderState({required this.index});
 }
+
+/// add work screen button clicked
+final class AddWorkScreenButtonClickedState extends AddWorkScreenListnerState {}

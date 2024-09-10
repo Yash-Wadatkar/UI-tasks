@@ -6,19 +6,20 @@ import 'package:ui_tasks/core/const/custom_style_widget.dart';
 
 class ExpandingCardWidget extends StatelessWidget {
   final void Function()? ontap;
-  final TextEditingController dateController;
-  final TextEditingController numberController;
-  final TextEditingController lengthController;
-  final TextEditingController widthController;
-  final TextEditingController depthController;
-  const ExpandingCardWidget(
-      {super.key,
-      this.ontap,
-      required this.dateController,
-      required this.numberController,
-      required this.lengthController,
-      required this.widthController,
-      required this.depthController});
+  final String date;
+  final String number;
+  final String length;
+  final String width;
+  final String depth;
+  const ExpandingCardWidget({
+    super.key,
+    this.ontap,
+    required this.date,
+    required this.number,
+    required this.length,
+    required this.width,
+    required this.depth,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -72,10 +73,10 @@ class ExpandingCardWidget extends StatelessWidget {
             Expanded(
               flex: 2,
               child: TextField(
-                controller: dateController,
                 onTap: ontap,
                 readOnly: true,
                 decoration: InputDecoration(
+                  hintText: date,
                   suffixIcon: Icon(
                     Icons.calendar_month_outlined,
                     color: blueColor,
@@ -113,8 +114,9 @@ class ExpandingCardWidget extends StatelessWidget {
             Expanded(
               flex: 2,
               child: TextField(
-                controller: numberController,
+                readOnly: true,
                 decoration: InputDecoration(
+                  hintText: number,
                   filled: true,
                   fillColor: Colors.white,
                   focusedBorder: OutlineInputBorder(
@@ -164,8 +166,9 @@ class ExpandingCardWidget extends StatelessWidget {
             Expanded(
               flex: 8,
               child: TextField(
-                controller: lengthController,
+                readOnly: true,
                 decoration: InputDecoration(
+                  hintText: length,
                   filled: true,
                   fillColor: Colors.white,
                   focusedBorder: OutlineInputBorder(
@@ -215,8 +218,9 @@ class ExpandingCardWidget extends StatelessWidget {
             Expanded(
               flex: 8,
               child: TextField(
-                controller: widthController,
+                readOnly: true,
                 decoration: InputDecoration(
+                  hintText: width,
                   filled: true,
                   fillColor: Colors.white,
                   focusedBorder: OutlineInputBorder(
@@ -266,8 +270,9 @@ class ExpandingCardWidget extends StatelessWidget {
             Expanded(
               flex: 8,
               child: TextField(
-                controller: depthController,
+                readOnly: true,
                 decoration: InputDecoration(
+                  hintText: depth,
                   filled: true,
                   fillColor: Colors.white,
                   focusedBorder: OutlineInputBorder(
