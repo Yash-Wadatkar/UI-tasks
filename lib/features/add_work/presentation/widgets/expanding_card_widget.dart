@@ -7,12 +7,23 @@ import 'package:ui_tasks/core/const/custom_style_widget.dart';
 class ExpandingCardWidget extends StatelessWidget {
   final void Function()? ontap;
   final TextEditingController dateController;
+  final TextEditingController numberController;
+  final TextEditingController lengthController;
+  final TextEditingController widthController;
+  final TextEditingController depthController;
   const ExpandingCardWidget(
-      {super.key, this.ontap, required this.dateController});
+      {super.key,
+      this.ontap,
+      required this.dateController,
+      required this.numberController,
+      required this.lengthController,
+      required this.widthController,
+      required this.depthController});
 
   @override
   Widget build(BuildContext context) {
     return ExpansionTile(
+      initiallyExpanded: true,
       collapsedIconColor: blueColor,
       iconColor: blueColor,
       shape: const ContinuousRectangleBorder(),
@@ -102,6 +113,7 @@ class ExpandingCardWidget extends StatelessWidget {
             Expanded(
               flex: 2,
               child: TextField(
+                controller: numberController,
                 decoration: InputDecoration(
                   filled: true,
                   fillColor: Colors.white,
@@ -152,6 +164,7 @@ class ExpandingCardWidget extends StatelessWidget {
             Expanded(
               flex: 8,
               child: TextField(
+                controller: lengthController,
                 decoration: InputDecoration(
                   filled: true,
                   fillColor: Colors.white,
@@ -202,6 +215,7 @@ class ExpandingCardWidget extends StatelessWidget {
             Expanded(
               flex: 8,
               child: TextField(
+                controller: widthController,
                 decoration: InputDecoration(
                   filled: true,
                   fillColor: Colors.white,
@@ -252,6 +266,7 @@ class ExpandingCardWidget extends StatelessWidget {
             Expanded(
               flex: 8,
               child: TextField(
+                controller: depthController,
                 decoration: InputDecoration(
                   filled: true,
                   fillColor: Colors.white,
