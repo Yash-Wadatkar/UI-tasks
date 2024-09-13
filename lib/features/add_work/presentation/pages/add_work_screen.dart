@@ -4,7 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sizer/sizer.dart';
 import 'package:ui_tasks/core/const/color_constant.dart';
 import 'package:ui_tasks/core/const/custom_style_widget.dart';
-import 'package:ui_tasks/core/const/string_constants.dart';
+import 'package:ui_tasks/core/repository/work_repository.dart';
+
 import 'package:ui_tasks/features/add_work/presentation/bloc/add_work_screen_bloc.dart';
 import 'package:ui_tasks/features/add_work/presentation/bloc/add_work_screen_event.dart';
 import 'package:ui_tasks/features/add_work/presentation/bloc/add_work_screen_state.dart';
@@ -21,10 +22,18 @@ class AddWorkScreen extends StatefulWidget {
 }
 
 class _AddWorkScreenState extends State<AddWorkScreen> {
-  /// creating instance of add work screen bloc
-  final addWorkScreenBloc = AddWorkScreenBloc();
+  /// creating instance of add work screen bloc with repository
+  final WorkRepository workRepository = WorkRepository();
+  late final AddWorkScreenBloc addWorkScreenBloc;
 
-  final Map<int, Map<String, String>> _data = {};
+  // final Map<int, Map<String, String>> _data = {};
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    addWorkScreenBloc = AddWorkScreenBloc(workRepository: workRepository);
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,15 +46,13 @@ class _AddWorkScreenState extends State<AddWorkScreen> {
               current is! AddWorkScreenListnerState,
           listenWhen: (previous, current) =>
               current is AddWorkScreenListnerState,
-          listener: (context, state) {
-            switch (state.runtimeType) {
-              case OpenCalenderState:
-                final openCalenderState = state as OpenCalenderState;
-            }
-          },
+          listener: (context, state) {},
           builder: (context, state) {
             switch (state.runtimeType) {
               case AddWorkScreenInitialState:
+                // Fetch data from the repository
+                final Map<int, Map<String, String>> data =
+                    addWorkScreenBloc.getData();
                 return SingleChildScrollView(
                   child: Padding(
                     padding: EdgeInsets.symmetric(horizontal: 4.w),
@@ -54,7 +61,7 @@ class _AddWorkScreenState extends State<AddWorkScreen> {
                         /// description widget
                         const DescriptionWidget(),
                         SizedBox(height: 1.h),
-                        _data.isEmpty
+                        data.isEmpty
                             ? Text(
                                 'No Data Added Yet!',
                                 style: CustomTextStyle.textStyle(
@@ -65,10 +72,10 @@ class _AddWorkScreenState extends State<AddWorkScreen> {
                             : ListView.builder(
                                 physics: const NeverScrollableScrollPhysics(),
                                 shrinkWrap: true,
-                                itemCount: _data.length,
+                                itemCount: data.length,
                                 itemBuilder: (context, index) {
                                   final Map<String, String> itemData =
-                                      _data[index] ?? {};
+                                      data[index] ?? {};
                                   return Padding(
                                     padding:
                                         EdgeInsets.symmetric(vertical: 1.h),
@@ -114,19 +121,15 @@ class _AddWorkScreenState extends State<AddWorkScreen> {
       listener: (context, state) {
         switch (state.runtimeType) {
           case AddWorkScreenButtonClickedState:
+            // Fetch data from the repository
+            final Map<int, Map<String, String>> data =
+                addWorkScreenBloc.getData();
             Navigator.push(context, MaterialPageRoute(
               builder: (context) {
                 return const AddWorkItemsScreen();
               },
             )).then((value) {
-              if (value is Map<String, String>) {
-                final int nextIndex = _data
-                    .length; // Assuming new index is based on current length
-                _data[nextIndex] =
-                    value; // Assigning the received data to the next index
-                print(_data.length);
-                addWorkScreenBloc.add(RebuildAddWorkScreenEvent());
-              }
+              addWorkScreenBloc.add(RebuildAddWorkScreenEvent());
             });
         }
       },

@@ -1,11 +1,15 @@
 import 'package:calendar_date_picker2/calendar_date_picker2.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:sizer/sizer.dart';
 import 'package:ui_tasks/core/const/color_constant.dart';
 import 'package:ui_tasks/core/const/custom_style_widget.dart';
+import 'package:ui_tasks/core/const/string_constants.dart';
+import 'package:ui_tasks/core/repository/work_repository.dart';
+
 import 'package:ui_tasks/features/add_work_items_screen/presentation/bloc/add_work_item_bloc.dart';
 import 'package:ui_tasks/features/add_work_items_screen/presentation/bloc/add_work_item_event.dart';
 import 'package:ui_tasks/features/add_work_items_screen/presentation/bloc/add_work_item_state.dart';
@@ -19,8 +23,12 @@ class AddWorkItemsScreen extends StatefulWidget {
 }
 
 class _AddWorkItemsScreenState extends State<AddWorkItemsScreen> {
+  /// instance of work repo class to send data to map in work repo class
+  final WorkRepository workRepository = WorkRepository();
+
   /// creating instance of add work item
-  final addWorkItemScreenBloc = AddWorkItemBloc();
+  late final AddWorkItemBloc addWorkItemScreenBlocOne;
+  late final AddWorkItemBloc addWorkItemScreenBlocTwo;
 
   /// creating controllers for textfield
   final TextEditingController _descriptionController = TextEditingController();
@@ -36,28 +44,49 @@ class _AddWorkItemsScreenState extends State<AddWorkItemsScreen> {
   final List<String> units = ['Unit 1', 'Unit 2', 'Unit 3'];
   final List<String> clientsList = ['Client1', 'Client2', 'Client3'];
 
-  /// variable to check uncheck the checkbox
   /// Variables to check/uncheck the checkboxes
   bool _isReworkChecked = false;
   bool _isFlagBillableChecked = false;
 
+  /// max length of description for description textfield
+  final int _descriptionMaxLength = 500;
+
+  /// map to store the data from field
   final Map<String, String> mapData = {};
+
+  /// form key for validating
   final _formKey = GlobalKey<FormState>();
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    addWorkItemScreenBlocOne = AddWorkItemBloc(workRepository: workRepository);
+    addWorkItemScreenBlocTwo = AddWorkItemBloc(workRepository: workRepository);
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: skyBlueColor,
+
+      /// method to build appbar
       appBar: _buildAppBarWidget(),
       body: BlocConsumer(
-        bloc: addWorkItemScreenBloc,
+        bloc: addWorkItemScreenBlocOne,
         buildWhen: (previous, current) => current is! AddWorkItemListnerState,
         listenWhen: (previous, current) => current is AddWorkItemListnerState,
         listener: (context, state) {
           switch (state.runtimeType) {
             case OpenCalenderSate:
+
+              /// method to sshow date picker
               _showDatePicker();
 
             case SelectValueState:
+
+              /// if drop down is select unit then assign value to unit controller
+              /// if its flag raised then assign value to flagraised controller
               final selectedValueState = state as SelectValueState;
               if (selectedValueState.fieldName == 'Default Units') {
                 _defaultUnitsController.text = selectedValueState.value;
@@ -92,7 +121,7 @@ class _AddWorkItemsScreenState extends State<AddWorkItemsScreen> {
                           height: 2.h,
                         ),
                         Text(
-                          'Add Work Description',
+                          addWorkDescriptionText,
                           style: CustomTextStyle.textStyle(
                               fontSize: 14.spa,
                               fontWeight: FontWeight.w400,
@@ -111,19 +140,31 @@ class _AddWorkItemsScreenState extends State<AddWorkItemsScreen> {
                           },
                           controller: _descriptionController,
                           maxLines: 5,
-                          // maxLength: 500,
+                          maxLength: 500,
                           decoration: const InputDecoration(
+                              counterText: '',
                               filled: true,
                               fillColor: Colors.white,
                               border: InputBorder.none),
+                          onChanged: (value) {
+                            addWorkItemScreenBlocTwo
+                                .add(DescriptionChangedEvent());
+                          },
                         ),
                         SizedBox(height: 1.h),
-                        Text(
-                          '500 characters remaining',
-                          style: TextStyle(
-                              fontSize: 10.spa,
-                              fontStyle: FontStyle.italic,
-                              color: greyColor),
+                        BlocBuilder(
+                          bloc: addWorkItemScreenBlocTwo,
+                          buildWhen: (previous, current) =>
+                              current is! AddWorkItemListnerState,
+                          builder: (context, state) {
+                            return Text(
+                              '${_descriptionMaxLength - _descriptionController.text.length} characters remaining',
+                              style: TextStyle(
+                                  fontSize: 10.spa,
+                                  fontStyle: FontStyle.italic,
+                                  color: greyColor),
+                            );
+                          },
                         ),
                         SizedBox(
                           height: 1.h,
@@ -142,7 +183,7 @@ class _AddWorkItemsScreenState extends State<AddWorkItemsScreen> {
                             color: blueColor,
                           ),
                           ontap: () {
-                            addWorkItemScreenBloc.add(OpenCalenderEvent());
+                            addWorkItemScreenBlocOne.add(OpenCalenderEvent());
                           },
                         ),
                         SizedBox(
@@ -222,8 +263,10 @@ class _AddWorkItemsScreenState extends State<AddWorkItemsScreen> {
                               onChanged: (value) {
                                 if (value != null) {
                                   /// Emit event to BLoC to toggle checkbox state
-                                  addWorkItemScreenBloc.add(CheckBoxClickEvent(
-                                      isChecked: value, fieldName: 'Rework'));
+                                  addWorkItemScreenBlocOne.add(
+                                      CheckBoxClickEvent(
+                                          isChecked: value,
+                                          fieldName: 'Rework'));
                                 }
                               },
                             ),
@@ -252,13 +295,49 @@ class _AddWorkItemsScreenState extends State<AddWorkItemsScreen> {
                               focusColor: blueColor,
                               value: _isFlagBillableChecked,
                               onChanged: (value) {
-                                addWorkItemScreenBloc.add(CheckBoxClickEvent(
+                                addWorkItemScreenBlocOne.add(CheckBoxClickEvent(
                                     isChecked: value!,
                                     fieldName: 'Flag Billable'));
                               },
                             ),
                             const Text('Is this rework flag billable?'),
                           ],
+                        ),
+
+                        Divider(
+                          color: greyColor.withOpacity(0.2),
+                        ),
+                        SizedBox(
+                          height: 1.h,
+                        ),
+                        Row(
+                          children: [
+                            Expanded(
+                              flex: 2,
+                              child: Text(
+                                subTotal,
+                                overflow: TextOverflow.ellipsis,
+                                style: CustomTextStyle.textStyle(
+                                    fontSize: 12.spa,
+                                    fontWeight: FontWeight.w500),
+                              ),
+                            ),
+                            const Expanded(flex: 3, child: SizedBox()),
+                            Expanded(
+                              flex: 1,
+                              child: Text(
+                                '69.36 CY',
+                                overflow: TextOverflow.ellipsis,
+                                style: CustomTextStyle.textStyle(
+                                    fontSize: 12.spa,
+                                    color: greyColor,
+                                    fontWeight: FontWeight.w500),
+                              ),
+                            )
+                          ],
+                        ),
+                        SizedBox(
+                          height: 2.h,
                         ),
                       ],
                     ),
@@ -285,13 +364,17 @@ class _AddWorkItemsScreenState extends State<AddWorkItemsScreen> {
       title: Row(
         children: [
           Padding(
-            padding: EdgeInsets.only(left: 3.w, right: 2.w),
-            child: Icon(
-              Icons.arrow_back_ios,
-              color: blueColor,
-              size: 20,
-            ),
-          ),
+              padding: EdgeInsets.only(left: 3.w, right: 2.w),
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.pop(context, true);
+                },
+                child: Icon(
+                  Icons.arrow_back_ios,
+                  color: blueColor,
+                  size: 20,
+                ),
+              )),
           Text(
             'Add Work',
             overflow: TextOverflow.ellipsis,
@@ -308,13 +391,17 @@ class _AddWorkItemsScreenState extends State<AddWorkItemsScreen> {
   /// method to build bottombar
   Widget _buildBottomBar() {
     return BlocConsumer(
-      bloc: addWorkItemScreenBloc,
+      bloc: addWorkItemScreenBlocOne,
       buildWhen: (previous, current) => current is! AddWorkItemListnerState,
       listenWhen: (previous, current) => current is AddWorkItemListnerState,
       listener: (context, state) {
         switch (state.runtimeType) {
           case SaveAndAddButtonClickedState:
-            Navigator.pop(context, mapData);
+            Navigator.pop(context, true);
+
+          case SaveButtonClickedState:
+            _clearControllers();
+            _formKey.currentState!.reset();
         }
       },
       builder: (context, state) {
@@ -358,8 +445,8 @@ class _AddWorkItemsScreenState extends State<AddWorkItemsScreen> {
                             "depth": _depthController.text,
                             'client': _flagRaisedController.text
                           });
-                          addWorkItemScreenBloc
-                              .add(SaveAndAddButtonClickedEvent());
+                          addWorkItemScreenBlocOne
+                              .add(SaveButtonClickedEvent(formData: mapData));
                         }
                       },
                       child: Padding(
@@ -385,7 +472,22 @@ class _AddWorkItemsScreenState extends State<AddWorkItemsScreen> {
                 child: Padding(
                   padding: EdgeInsets.only(top: 2.1.h, bottom: 4.h, right: 3.w),
                   child: ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      if (_formKey.currentState!.validate()) {
+                        mapData.addAll({
+                          'description': _descriptionController.text,
+                          'selectedDate': _dateController.text,
+                          'defaultUnit': _defaultUnitsController.text,
+                          "number": _numberController.text,
+                          "length": _lengthController.text,
+                          "width": _widthController.text,
+                          "depth": _depthController.text,
+                          'client': _flagRaisedController.text
+                        });
+                        addWorkItemScreenBlocOne.add(
+                            SaveAndAddButtonClickedEvent(formData: mapData));
+                      }
+                    },
                     style: ButtonStyle(
                         backgroundColor: WidgetStatePropertyAll(blueColor),
                         foregroundColor:
@@ -492,47 +594,80 @@ class _AddWorkItemsScreenState extends State<AddWorkItemsScreen> {
               fontSize: 15.sp, fontWeight: FontWeight.w500),
         ),
         SizedBox(height: 1.h),
-        Container(
-          width: double.infinity,
-          decoration: BoxDecoration(
-              color: Colors.white,
-              border: Border.all(color: searchBarBorderColor)),
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton2<String>(
-              items: list
-                  .map((unit) => DropdownMenuItem<String>(
-                        value: unit,
-                        child: Text(unit),
-                      ))
-                  .toList(),
-              onChanged: (value) {
-                if (value != null) {
-                  // Update the BLoC state
-                  addWorkItemScreenBloc.add(
-                      SelectValueEvent(value: value, fieldName: textfieldName));
-                  // Update the controller text to reflect the new selected value
-                  dropDownController.text = value;
-                }
-              },
-              iconStyleData: IconStyleData(
-                icon: Padding(
-                  padding: EdgeInsets.all(4.w),
-                  child: Transform.rotate(
-                    angle: 55,
+        DropdownButtonFormField2<String>(
+            iconStyleData: IconStyleData(
+                iconSize: 18,
+                icon: Transform.rotate(
+                  angle: 55,
+                  child: Padding(
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 5.w, vertical: 1.h),
                     child: Icon(
                       Icons.arrow_back_ios,
                       color: blueColor,
-                      size: 15,
                     ),
                   ),
-                ),
-              ),
-              hint: Text(hintText),
-              value: selectedValue,
+                )),
+            dropdownStyleData: DropdownStyleData(
+                decoration: BoxDecoration(color: skyBlueColor)),
+            decoration: InputDecoration(
+              suffixIcon: null,
+              enabledBorder: OutlineInputBorder(
+                  borderRadius: const BorderRadius.all(Radius.zero),
+                  borderSide:
+                      BorderSide(width: 1.2, color: searchBarBorderColor)),
+              focusedBorder: OutlineInputBorder(
+                  borderRadius: const BorderRadius.all(Radius.zero),
+                  borderSide:
+                      BorderSide(width: 1.2, color: searchBarBorderColor)),
+              isDense: true,
+              filled: true,
+              fillColor: Colors.white,
+              contentPadding:
+                  EdgeInsets.symmetric(horizontal: 0.7.w, vertical: 1.25.h),
             ),
-          ),
-        ),
+            hint: Text(
+              hintText,
+              style: CustomTextStyle.textStyle(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w600,
+                  color: greyColor),
+            ),
+            value: selectedValue,
+            items: list
+                .map(
+                  (unit) => DropdownMenuItem<String>(
+                    value: unit,
+                    child: Text(unit),
+                  ),
+                )
+                .toList(),
+            onChanged: (value) {
+              selectedValue = value;
+              dropDownController.text = value!;
+            },
+            autovalidateMode: AutovalidateMode.onUserInteraction,
+            validator: textfieldName == 'Flag Raised by'
+                ? (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please select a unit';
+                    }
+                    return null;
+                  }
+                : null),
       ],
     );
+  }
+
+  /// method to clear controllers data
+  void _clearControllers() {
+    _descriptionController.clear();
+    _dateController.clear();
+    _defaultUnitsController.clear();
+    _depthController.clear();
+    _lengthController.clear();
+    _widthController.clear();
+    _flagRaisedController.clear();
+    _numberController.clear();
   }
 }

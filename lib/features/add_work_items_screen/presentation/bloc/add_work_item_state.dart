@@ -33,3 +33,8 @@ final class SelectValueState extends AddWorkItemListnerState {
 
 /// save and add button clicked state
 final class SaveAndAddButtonClickedState extends AddWorkItemListnerState {}
+
+/// save button clicked state
+final class SaveButtonClickedState extends AddWorkItemListnerState {}
+
+final class DescriptionUpdatedState extends AddWorkItemState {}

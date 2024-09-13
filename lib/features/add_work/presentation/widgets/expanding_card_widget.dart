@@ -4,6 +4,7 @@ import 'package:ui_tasks/core/const/color_constant.dart';
 
 import 'package:ui_tasks/core/const/custom_style_widget.dart';
 
+/// widget for expanding tile
 class ExpandingCardWidget extends StatelessWidget {
   final void Function()? ontap;
   final String date;

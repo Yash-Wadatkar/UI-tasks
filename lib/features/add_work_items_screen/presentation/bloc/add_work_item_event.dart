@@ -25,4 +25,18 @@ class SelectValueEvent extends AddWorkItemEvent {
 }
 
 /// save and add button click event
-class SaveAndAddButtonClickedEvent extends AddWorkItemEvent {}
+class SaveAndAddButtonClickedEvent extends AddWorkItemEvent {
+  final Map<String, String> formData;
+
+  SaveAndAddButtonClickedEvent({required this.formData});
+}
+
+/// save button clicked state
+class SaveButtonClickedEvent extends AddWorkItemEvent {
+  final Map<String, String> formData;
+
+  SaveButtonClickedEvent({required this.formData});
+}
+
+/// event to rebuild description textfield
+class DescriptionChangedEvent extends AddWorkItemEvent {}

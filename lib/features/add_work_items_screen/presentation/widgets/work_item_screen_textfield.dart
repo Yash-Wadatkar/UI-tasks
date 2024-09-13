@@ -3,6 +3,8 @@ import 'package:sizer/sizer.dart';
 import 'package:ui_tasks/core/const/color_constant.dart';
 import 'package:ui_tasks/core/const/custom_style_widget.dart';
 
+/// work item screen custom textfield
+
 class WorkItemScreenTextfield extends StatelessWidget {
   final String textfieldName;
   final TextEditingController controller;
@@ -28,6 +30,7 @@ class WorkItemScreenTextfield extends StatelessWidget {
       ),
       SizedBox(height: 1.h),
       TextFormField(
+          keyboardType: _getKeyboardType(textfieldName),
           validator: validator,
           onTap: ontap,
           autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -49,5 +52,18 @@ class WorkItemScreenTextfield extends StatelessWidget {
                   borderRadius: BorderRadius.all(Radius.zero)),
               suffixIcon: suffixIcon))
     ]);
+  }
+
+  /// method to select keyboard type
+  TextInputType _getKeyboardType(String textfieldName) {
+    switch (textfieldName) {
+      case 'No':
+      case 'Length':
+      case 'Width':
+      case 'Depth':
+        return TextInputType.number;
+      default:
+        return TextInputType.text; // Default keyboard type
+    }
   }
 }

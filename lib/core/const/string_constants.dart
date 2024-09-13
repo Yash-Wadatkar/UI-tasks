@@ -27,6 +27,10 @@ const String addDFRText = 'Add DFR';
 
 const String cancelText = 'Cancel';
 
+const String addWorkDescriptionText = 'Add Work Description';
+
+const String subTotal = 'Sub Total';
+
 /// static data for items table
 const List<Map<String, String>> itemsList = [
   {'item': 'Item Code', 'qty': '1.1.1'},
